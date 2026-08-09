@@ -9,12 +9,17 @@ Route::prefix('v1')->group(function () {
     Route::get('/health', function () {
         try {
             DB::selectOne('select ?::text as value', ['ready']);
+            DB::table('my_links')
+                ->where('user_id', '00000000-0000-0000-0000-000000000000')
+                ->limit(1)
+                ->get();
 
             return response()->json([
                 'status' => 'ok',
                 'service' => 'nexarch-api',
                 'database' => 'available',
-                'check_version' => 3,
+                'application_tables' => 'available',
+                'check_version' => 4,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -23,10 +28,11 @@ Route::prefix('v1')->group(function () {
                 'status' => 'degraded',
                 'service' => 'nexarch-api',
                 'database' => 'unavailable',
+                'application_tables' => 'unavailable',
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 3,
+                'check_version' => 4,
             ]);
         }
     });
