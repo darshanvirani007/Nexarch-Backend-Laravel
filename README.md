@@ -28,7 +28,7 @@ Fill these environment values:
 ```dotenv
 FRONTEND_URL=http://localhost:3000
 DB_HOST=<host shown by Supabase Connect>
-DB_PORT=5432
+DB_PORT=<port shown by Supabase Connect>
 DB_DATABASE=postgres
 DB_USERNAME=<username shown by Supabase Connect>
 DB_PASSWORD=<database-password>
