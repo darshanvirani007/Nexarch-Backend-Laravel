@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::get('/health', function () {
         try {
-            DB::selectOne('select 1');
+            DB::selectOne('select ?::text as value', ['ready']);
 
             return response()->json([
                 'status' => 'ok',
                 'service' => 'nexarch-api',
                 'database' => 'available',
-                'check_version' => 2,
+                'check_version' => 3,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -26,7 +26,7 @@ Route::prefix('v1')->group(function () {
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 2,
+                'check_version' => 3,
             ]);
         }
     });
