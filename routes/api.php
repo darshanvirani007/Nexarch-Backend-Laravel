@@ -1,10 +1,35 @@
 <?php
 
 use App\Http\Controllers\Api\{AuthController,BusinessController,BusinessLinkController,BusinessNoteController,BusinessSocialLinkController,DailyTaskController,DashboardController,DevelopmentKeyController,GoalController,JobApplicationController,LearningController,MyLinkController,ProfileController,SearchController,TaskController,WebsiteCheckController};
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::get('/health', fn () => response()->json(['status'=>'ok','service'=>'nexarch-api']));
+    Route::get('/health', function () {
+        try {
+            DB::selectOne('select 1');
+
+            return response()->json([
+                'status' => 'ok',
+                'service' => 'nexarch-api',
+                'database' => 'available',
+                'check_version' => 2,
+            ]);
+        } catch (\Throwable $error) {
+            report($error);
+
+            return response()->json([
+                'status' => 'degraded',
+                'service' => 'nexarch-api',
+                'database' => 'unavailable',
+                'database_error_code' => $error instanceof QueryException
+                    ? ($error->errorInfo[0] ?? null)
+                    : null,
+                'check_version' => 2,
+            ]);
+        }
+    });
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class,'login'])->middleware('throttle:10,1');
         Route::post('/register', [AuthController::class,'register'])->middleware('throttle:5,1');
