@@ -27,17 +27,18 @@ Fill these environment values:
 
 ```dotenv
 FRONTEND_URL=http://localhost:3000
-DB_HOST=<host shown by Supabase Connect>
-DB_PORT=<port shown by Supabase Connect>
+DB_HOST=<transaction-pooler host shown by Supabase Connect>
+DB_PORT=6543
 DB_DATABASE=postgres
 DB_USERNAME=<username shown by Supabase Connect>
 DB_PASSWORD=<database-password>
 DB_SSLMODE=require
+DB_PGSQL_EMULATE_PREPARES=true
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_ANON_KEY=<anon-key>
 ```
 
-On an IPv4-only host, use the Supabase session pooler connection details from **Connect → Session pooler** rather than the direct IPv6 database host.
+This deployment is configured for the IPv4-compatible Supabase transaction pooler from **Connect → Transaction pooler**. Its port is `6543`. Because transaction mode does not support server-side prepared statements, `DB_PGSQL_EMULATE_PREPARES=true` makes PDO prepare statements client-side. The username is normally `postgres.<project-ref>`.
 
 The supplied schema already exists, so this project does not migrate or replace those application tables. Supabase Vault must be enabled for development-key endpoints.
 
