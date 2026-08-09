@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\{AuthController,BusinessController,BusinessLinkController,BusinessNoteController,BusinessSocialLinkController,DailyTaskController,DashboardController,DevelopmentKeyController,GoalController,JobApplicationController,LearningController,MyLinkController,ProfileController,SearchController,TaskController,WebsiteCheckController};
+use App\Models\MyLink;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -13,13 +14,19 @@ Route::prefix('v1')->group(function () {
                 ->where('user_id', '00000000-0000-0000-0000-000000000000')
                 ->limit(1)
                 ->get();
+            MyLink::query()
+                ->ownedBy('00000000-0000-0000-0000-000000000000')
+                ->orderBy('display_order')
+                ->orderBy('created_at')
+                ->get();
 
             return response()->json([
                 'status' => 'ok',
                 'service' => 'nexarch-api',
                 'database' => 'available',
                 'application_tables' => 'available',
-                'check_version' => 4,
+                'application_models' => 'available',
+                'check_version' => 5,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -29,10 +36,11 @@ Route::prefix('v1')->group(function () {
                 'service' => 'nexarch-api',
                 'database' => 'unavailable',
                 'application_tables' => 'unavailable',
+                'application_models' => 'unavailable',
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 4,
+                'check_version' => 5,
             ]);
         }
     });
