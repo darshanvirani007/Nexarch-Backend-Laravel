@@ -1,0 +1,4 @@
+<?php
+namespace App\Http\Controllers\Api;
+use App\Http\Controllers\Controller; use App\Models\{Business,Goal,JobApplication,Learning,MyLink,Task}; use Illuminate\Http\JsonResponse; use Illuminate\Http\Request;
+class SearchController extends Controller { public function __invoke(Request $r):JsonResponse{$q=$r->validate(['q'=>['required','string','min:2','max:100']])['q'];$u=$r->attributes->get('user_id');$like='%'.$q.'%';return response()->json(['businesses'=>Business::ownedBy($u)->where('name','ilike',$like)->limit(10)->get(),'links'=>MyLink::ownedBy($u)->where('name','ilike',$like)->limit(10)->get(),'learning'=>Learning::ownedBy($u)->where('title','ilike',$like)->limit(10)->get(),'goals'=>Goal::ownedBy($u)->where('title','ilike',$like)->limit(10)->get(),'tasks'=>Task::ownedBy($u)->where('task','ilike',$like)->limit(10)->get(),'jobs'=>JobApplication::ownedBy($u)->where('job_name','ilike',$like)->limit(10)->get()]);}}
