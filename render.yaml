@@ -37,7 +37,7 @@ services:
         sync: false
       - key: DB_SSLMODE
         value: require
-      - key: DB_PGSQL_EMULATE_PREPARES
+      - key: DB_PGSQL_DISABLE_PREPARES
         value: "true"
       - key: SUPABASE_URL
         sync: false

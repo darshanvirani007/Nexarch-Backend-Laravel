@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/health', function () {
         try {
             DB::selectOne('select ?::text as value', ['ready']);
+            DB::selectOne('select ?::boolean as value', [false]);
             DB::table('my_links')
                 ->where('user_id', '00000000-0000-0000-0000-000000000000')
                 ->limit(1)
@@ -34,7 +35,7 @@ Route::prefix('v1')->group(function () {
                 'application_tables' => 'available',
                 'application_models' => 'available',
                 'rate_limiter' => 'available',
-                'check_version' => 6,
+                'check_version' => 7,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -49,7 +50,7 @@ Route::prefix('v1')->group(function () {
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 6,
+                'check_version' => 7,
             ]);
         }
     });

@@ -98,10 +98,12 @@ return [
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'options' => extension_loaded('pdo_pgsql') ? [
-                // Supavisor transaction mode (port 6543) cannot use
-                // server-side prepared statements. PDO safely binds values
-                // while preparing the statement client-side instead.
-                PDO::ATTR_EMULATE_PREPARES => env('DB_PGSQL_EMULATE_PREPARES', true),
+                // Supavisor transaction mode cannot retain named prepared
+                // statements between requests. Send each query and its typed
+                // parameters together so PostgreSQL still receives booleans,
+                // UUIDs, dates, and numerics with their correct types.
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::PGSQL_ATTR_DISABLE_PREPARES => env('DB_PGSQL_DISABLE_PREPARES', true),
             ] : [],
         ],
 
