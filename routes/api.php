@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\{AuthController,BusinessController,BusinessLinkController,BusinessNoteController,BusinessSocialLinkController,DailyTaskController,DashboardController,DevelopmentKeyController,GoalController,JobApplicationController,LearningController,MyLinkController,ProfileController,SearchController,TaskController,WebsiteCheckController};
 use App\Models\MyLink;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,12 @@ Route::prefix('v1')->group(function () {
                 ->orderBy('display_order')
                 ->orderBy('created_at')
                 ->get();
+            app(RateLimiter::class)->attempt(
+                'nexarch-health-check',
+                60,
+                static fn () => true,
+                60,
+            );
 
             return response()->json([
                 'status' => 'ok',
@@ -26,7 +33,8 @@ Route::prefix('v1')->group(function () {
                 'database' => 'available',
                 'application_tables' => 'available',
                 'application_models' => 'available',
-                'check_version' => 5,
+                'rate_limiter' => 'available',
+                'check_version' => 6,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -37,10 +45,11 @@ Route::prefix('v1')->group(function () {
                 'database' => 'unavailable',
                 'application_tables' => 'unavailable',
                 'application_models' => 'unavailable',
+                'rate_limiter' => 'unavailable',
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 5,
+                'check_version' => 6,
             ]);
         }
     });
