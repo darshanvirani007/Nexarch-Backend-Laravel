@@ -39,4 +39,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error_code' => $sqlState,
             ], 500);
         });
+        $exceptions->render(function (\Error $error, Request $request) {
+            if (! $request->is('api/*')) return null;
+
+            report($error);
+
+            return response()->json([
+                'message' => sprintf(
+                    'Application request failed at %s (%s).',
+                    $request->path(),
+                    class_basename($error),
+                ),
+            ], 500);
+        });
     })->create();

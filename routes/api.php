@@ -35,7 +35,7 @@ Route::prefix('v1')->group(function () {
                 'application_tables' => 'available',
                 'application_models' => 'available',
                 'rate_limiter' => 'available',
-                'check_version' => 7,
+                'check_version' => 8,
             ]);
         } catch (\Throwable $error) {
             report($error);
@@ -50,7 +50,7 @@ Route::prefix('v1')->group(function () {
                 'database_error_code' => $error instanceof QueryException
                     ? ($error->errorInfo[0] ?? null)
                     : null,
-                'check_version' => 7,
+                'check_version' => 8,
             ]);
         }
     });
