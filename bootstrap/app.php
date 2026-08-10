@@ -23,11 +23,19 @@ return Application::configure(basePath: dirname(__DIR__))
             if (! $request->is('api/*')) return null;
 
             $sqlState = $error->errorInfo[0] ?? null;
+            $driverSummary = null;
+            if ($sqlState === '42883' && is_string($error->errorInfo[2] ?? null)) {
+                $driverSummary = trim(strtok($error->errorInfo[2], "\n") ?: '');
+                $driverSummary = mb_substr($driverSummary, 0, 240);
+            }
+
+            $message = $sqlState
+                ? "Database request failed ({$sqlState}) at {$request->path()}."
+                : 'Database request failed.';
+            if ($driverSummary) $message .= " {$driverSummary}";
 
             return response()->json([
-                'message' => $sqlState
-                    ? "Database request failed ({$sqlState})."
-                    : 'Database request failed.',
+                'message' => $message,
                 'error_code' => $sqlState,
             ], 500);
         });
