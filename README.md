@@ -10,7 +10,7 @@ It connects the Nexarch frontend to:
 
 Live API: [https://nexarch-api.onrender.com/api/v1](https://nexarch-api.onrender.com/api/v1)
 
-Live frontend: [https://nexarch-command-center.darshanvirani2468.chatgpt.site](https://nexarch-command-center.darshanvirani2468.chatgpt.site)
+Live frontend: [https://nexarch-frontend.vercel.app](https://nexarch-frontend.vercel.app)
 
 Commerce features and Google/Apple login are not implemented by this backend.
 
@@ -149,7 +149,7 @@ Use these Render environment variables:
 
 | Variable | Value |
 | --- | --- |
-| `FRONTEND_URL` | `https://nexarch-command-center.darshanvirani2468.chatgpt.site` |
+| `FRONTEND_URL` | `https://nexarch-frontend.vercel.app` |
 | `DB_HOST` | Transaction-pooler host from Supabase |
 | `DB_PORT` | `6543` |
 | `DB_DATABASE` | `postgres` |
