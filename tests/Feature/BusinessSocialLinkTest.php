@@ -131,6 +131,33 @@ class BusinessSocialLinkTest extends TestCase
         $this->assertTrue($trueResponse->getData(true)['show_on_card']);
     }
 
+    public function test_platform_username_and_url_can_be_updated_individually(): void
+    {
+        $business = $this->business();
+        $social = $this->social($business, true);
+
+        $platform = $this->controller()->update(
+            $this->request('PUT', ['platform' => 'github']),
+            $business->id,
+            $social->id,
+        )->getData(true);
+        $this->assertSame('github', $platform['platform']);
+
+        $username = $this->controller()->update(
+            $this->request('PUT', ['username' => 'nexarchhq']),
+            $business->id,
+            $social->id,
+        )->getData(true);
+        $this->assertSame('nexarchhq', $username['username']);
+
+        $url = $this->controller()->update(
+            $this->request('PUT', ['url' => 'https://github.com/nexarchhq']),
+            $business->id,
+            $social->id,
+        )->getData(true);
+        $this->assertSame('https://github.com/nexarchhq', $url['url']);
+    }
+
     public function test_updating_another_field_does_not_reset_visibility(): void
     {
         $business = $this->business();
@@ -165,6 +192,19 @@ class BusinessSocialLinkTest extends TestCase
         ]), $this->business()->id);
     }
 
+    public function test_invalid_update_url_fails_validation(): void
+    {
+        $business = $this->business();
+        $social = $this->social($business, true);
+
+        $this->expectException(ValidationException::class);
+        $this->controller()->update(
+            $this->request('PUT', ['url' => 'javascript:alert(1)']),
+            $business->id,
+            $social->id,
+        );
+    }
+
     public function test_another_user_cannot_update_a_social_link(): void
     {
         $business = $this->business(self::OTHER_USER_ID);
@@ -172,6 +212,53 @@ class BusinessSocialLinkTest extends TestCase
 
         $this->expectException(ModelNotFoundException::class);
         $this->controller()->update($this->request('PUT', ['show_on_card' => false]), $business->id, $social->id);
+    }
+
+    public function test_another_user_cannot_delete_a_social_link(): void
+    {
+        $business = $this->business(self::OTHER_USER_ID);
+        $social = $this->social($business, true, self::OTHER_USER_ID);
+
+        $this->expectException(ModelNotFoundException::class);
+        $this->controller()->destroy($this->request('DELETE'), $business->id, $social->id);
+    }
+
+    public function test_social_link_cannot_be_updated_through_the_wrong_business(): void
+    {
+        $correctBusiness = $this->business();
+        $wrongBusiness = $this->business();
+        $social = $this->social($correctBusiness, true);
+
+        $this->expectException(ModelNotFoundException::class);
+        $this->controller()->update(
+            $this->request('PUT', ['username' => 'intruder']),
+            $wrongBusiness->id,
+            $social->id,
+        );
+    }
+
+    public function test_business_detail_reflects_social_link_edits_and_deletion(): void
+    {
+        $business = $this->business();
+        $social = $this->social($business, true);
+        $request = $this->request('GET');
+
+        $this->controller()->update(
+            $this->request('PUT', ['platform' => 'github', 'show_on_card' => false]),
+            $business->id,
+            $social->id,
+        );
+
+        $afterEdit = (new BusinessController)->show($request, $business->id)->getData(true);
+        $this->assertSame('github', $afterEdit['social_links'][0]['platform']);
+        $this->assertFalse($afterEdit['social_links'][0]['show_on_card']);
+
+        $response = $this->controller()->destroy($this->request('DELETE'), $business->id, $social->id);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertDatabaseMissing('business_social_links', ['id' => $social->id]);
+
+        $afterDelete = (new BusinessController)->show($request, $business->id)->getData(true);
+        $this->assertSame([], $afterDelete['social_links']);
     }
 
     public function test_existing_create_update_and_delete_behaviour_remains_available(): void
