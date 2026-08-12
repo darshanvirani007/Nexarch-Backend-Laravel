@@ -275,6 +275,24 @@ Creating a business and creating its links are separate operations:
 
 The frontend must perform these follow-up requests. The backend cannot save link values that the frontend never sends.
 
+### One-time business-link constraint update
+
+If creating or editing a business link returns database error `23514`, the
+existing Supabase `business_links_type_check` constraint is older than the
+current business workspace. The workspace supports website, email, admin,
+hosting, domain, analytics and named custom shortcuts.
+
+Run the following repository file once in **Supabase Dashboard -> SQL Editor**:
+
+```text
+database/sql/2026-08-12_fix_business_links_type_check.sql
+```
+
+The patch keeps the check constraint enabled and expands its explicit allowed
+types. It does not delete records, disable RLS, change ownership policies or
+recreate the table. After it succeeds, deploy the matching backend revision so
+Laravel normalizes every submitted type into the same canonical format.
+
 ## Troubleshooting
 
 ### The health endpoint is slow
